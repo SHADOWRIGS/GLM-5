@@ -58,7 +58,7 @@ vLLM, SGLang, and xLLM all support local deployment of GLM-5. A simple deploymen
 
     then upgrade transformers:
 
-    ```
+    ```shell
     pip install git+https://github.com/huggingface/transformers.git
     ```
 
@@ -109,7 +109,7 @@ vLLM, SGLang, and xLLM all support local deployment of GLM-5. A simple deploymen
 
 + xLLM and other Ascend NPU
 
-    Please check the deployment guide [here](https://github.com/zai-org/GLM-5/blob/main/example/ascend.md).
+    Please check the [deployment guide](https://github.com/zai-org/GLM-5/blob/main/example/ascend.md).
 
 ## Citation
 

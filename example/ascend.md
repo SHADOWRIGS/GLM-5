@@ -1,8 +1,8 @@
 # Using Ascend NPU to Deploy GLM-5  
   
-- SGLang: https://github.com/sgl-project/sglang/blob/main/docs/platforms/ascend_npu_glm5_examples.md  
-- vLLM-Ascend: https://docs.vllm.ai/projects/ascend/en/latest/tutorials/models/GLM5.html
-- xLLM: https://github.com/jd-opensource/xllm/blob/preview/glm-5/docs/zh/getting_started/quick_start_GLM5.md  
+- [SGLang](https://github.com/sgl-project/sglang/blob/main/docs/platforms/ascend_npu_glm5_examples.md)
+- [vLLM-Ascend](https://docs.vllm.ai/projects/ascend/en/latest/tutorials/models/GLM5.html)
+- [xLLM](https://github.com/jd-opensource/xllm/blob/preview/glm-5/docs/zh/getting_started/quick_start_GLM5.md)
   
 ## Environment Preparation  
   
@@ -14,12 +14,13 @@
   
 It is recommended to download the model weight to the shared directory of multiple nodes, such as ==/root/.cache/==  
   
-### Installation  
+### Installation
+
 ### SGLang  
   
 The dependencies required for the NPU runtime environment have been integrated into a Docker image and uploaded to the quay.io platform. You can directly pull it.  
   
-```
+```bash
 #Atlas 800 A3
 swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5.0-a3-glm5
 
@@ -54,14 +55,15 @@ quay.io/ascend/sglang:${TAG}
 
 ```
   
-### vLLM  
+### vLLM
+
 vLLM and vLLM-ascend only support GLM-5 on our main branches. you can use our official docker images and upgrade vllm and vllm-ascend for inference.  
   
-Refer to [supported features](https://docs.vllm.ai/projects/ascend/en/latest/user_guide/support_matrix/supported_models.html)to get the model's supported feature matrix.  
+Refer to [supported features](https://docs.vllm.ai/projects/ascend/en/latest/user_guide/support_matrix/supported_models.html) to get the model's supported feature matrix.  
   
 Refer to [feature guide](https://docs.vllm.ai/projects/ascend/en/latest/user_guide/support_matrix/supported_features.html) to get the feature's configuration.  
   
-```
+```bash
 # Update --device according to your device (Atlas A3:/dev/davinci[0-15]).
 # Update the vllm-ascend image according to your environment.
 # Note you should download the weight to /root/.cache in advance.
@@ -103,7 +105,7 @@ In addition, if you don't want to use the docker image as above, you can also bu
   
 To inference ==GLM-5==, you should upgrade vllm、vllm-ascend、transformers to main branches:  
   
-```
+```bash
 # upgrade vllm
 git clone https://github.com/vllm-project/vllm.git
 cd vllm
@@ -128,7 +130,7 @@ If you want to deploy multi-node environment, you need to set up environment on 
   
 First, pull the image we provide:  
   
-```
+```bash
 # A2 x86
 docker pull quay.io/jd_xllm/xllm-ai:xllm-dev-hb-rc2-x86
 # A2 arm
@@ -140,7 +142,7 @@ docker pull quay.io/jd_xllm/xllm-ai:xllm-dev-hc-rc2-arm
   
 Then create the corresponding container:  
   
-```
+```bash
 sudo docker run -it --ipc=host -u 0 --privileged --name mydocker --network=host \
  -v /var/queue_schedule:/var/queue_schedule \
  -v /usr/local/Ascend/driver:/usr/local/Ascend/driver \
@@ -163,7 +165,7 @@ Pull Source Code and Build
   
 Clone the official repository and submodule dependencies:  
   
-```
+```bash
 git clone https://github.com/jd-opensource/xllm
 cd xllm 
 git checkout preview/glm-5
@@ -174,7 +176,7 @@ git submodule update
   
 Install dependencies:  
   
-```
+```bash
 pip install --upgrade pre-commit
 yum install numactl
 
@@ -182,7 +184,7 @@ yum install numactl
   
 Run the build command. The executable ==build/xllm/core/server/xllm== is generated under ==build/==:  
   
-```
+```bash
 python setup.py build --device a3
 
 ```
@@ -203,7 +205,7 @@ Not test yet.
   
 Run the following script to execute online inference.  
   
-```
+```bash
 # high performance cpu
 echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 sysctl -w vm.swappiness=0
@@ -256,7 +258,7 @@ Modify the IP of 2 nodes, then run the same scripts on two nodes.
   
 **node 0/1**  
   
-```
+```bash
 echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 sysctl -w vm.swappiness=0
 sysctl -w kernel.numa_balancing=0
@@ -339,7 +341,7 @@ Not test yet.
   
 Run the following script to execute online inference.  
   
-```
+```bash
 export HCCL_OP_EXPANSION_MODE="AIV"
 export OMP_PROC_BIND=false
 export OMP_NUM_THREADS=10
@@ -391,7 +393,7 @@ Run the following scripts on two nodes respectively.
   
 **node 0**  
   
-```
+```bash
 # this obtained through ifconfig
 # nic_name is the network interface name corresponding to local_ip of the current node
 nic_name="xxx"
@@ -437,7 +439,7 @@ vllm serve /root/.cache/modelscope/hub/models/vllm-ascend/GLM5-bf16 \
   
 **node 1**  
   
-```
+```bash
 # this obtained through ifconfig
 # nic_name is the network interface name corresponding to local_ip of the current node
 nic_name="xxx"
@@ -501,7 +503,7 @@ Not test yet.
   
 ### GLM-5 Weight Quantization  
   
-```
+```bash
 #Install msmodelslim
 git clone https://gitcode.com/shenxiaolong/msmodelslim.git
 cd msmodelslim
@@ -511,7 +513,7 @@ bash install.sh
   
 ### Modify tokenizer_config.json  
   
-```
+```bash
   "extra_special_tokens"
     Change to "additional_special_tokens"
 
@@ -522,7 +524,7 @@ bash install.sh
   
 ### Quantize GLM-5-BF16 Weights to W8A8  
   
-```
+```bash
 ### Preprocess MTP-related weights
 python example/GLM5/extract_mtp.py --model-dir ${model_path}
 
@@ -542,7 +544,7 @@ python example/GLM5/export_mtp.py --input-dir  ${int8_save_path} --output-dir  $
   
 Run the following script to execute online inference.  
   
-```
+```bash
 export LD_PRELOAD=/usr/lib64/libjemalloc.so.2:$LD_PRELOAD
 rm -rf /root/ascend/log/
 rm -rf core.*
@@ -619,7 +621,7 @@ done
 **++Notice:++**++ ++  
 ++The parameters are explained as follows:++  
   
-```
+```bash
 #numactl -C $((i*12))-$((i*12+11))  
 #                           CPU affinity pinning (check affinity with: npu-smi info -t topo)
 #--max_memory_utilization   Maximum memory usage ratio per card
@@ -650,7 +652,7 @@ done
   
 **++node 0++**  
   
-```
+```bash
 MASTER_NODE_ADDR="11.87.49.110:19990"
 LOCAL_HOST="11.87.49.110"
 START_PORT=15890
@@ -692,7 +694,7 @@ done
   
 **node 1**  
   
-```
+```bash
 MASTER_NODE_ADDR="11.87.49.110:19990"
 LOCAL_HOST="11.87.49.111"
 START_PORT=15890
@@ -744,7 +746,7 @@ done
   
 ++First, clone and install ==xllm service==, similar to installing/building ==xllm==:++  
   
-```
+```bash
 git clone https://github.com/jd-opensource/xllm-service
 cd xllm_service
 git submodule init
@@ -756,7 +758,7 @@ git submodule update
   
 ++==xllm_service== depends on [etcd](https://github.com/etcd-io/etcd). Install it via the official [installation script](https://github.com/etcd-io/etcd/releases). The default install path in that script is ==/tmp/etcd-download-test/etcd==. You can either modify the path in the script or move it manually afterward:++  
   
-```
+```bash
 mv /tmp/etcd-download-test/etcd /path/to/your/etcd
 
 ```
@@ -765,14 +767,14 @@ mv /tmp/etcd-download-test/etcd /path/to/your/etcd
   
 ++Apply the patch first:++  
   
-```
+```bash
 sh prepare.sh
 
 ```
   
 ++Then build:++  
   
-```
+```bash
 mkdir -p build
 cd build
 cmake ..
@@ -790,35 +792,35 @@ cd ..
   
 ++Start etcd:++  
   
-```
+```bash
 ./etcd-download-test/etcd --listen-peer-urls 'http://localhost:2390'  --listen-client-urls 'http://localhost:2389' --advertise-client-urls  'http://localhost:2391'
 
 ```
   
 ++For cross-machine deployment, etcd can be configured as follows:++  
   
-```
+```bash
 /tmp/etcd-download-test/etcd --listen-peer-urls 'http://0.0.0.0:3390' --listen-client-urls 'http://0.0.0.0:3389' --advertise-client-urls 'http://11.87.191.82:3389'
 
 ```
   
 ++Start xllm service:++  
   
-```
+```bash
 ENABLE_DECODE_RESPONSE_TO_SERVICE=true ./xllm_master_serving --etcd_addr="127.0.0.1:12389" --http_server_port 28888 --rpc_server_port 28889 --tokenizer_path=/export/home/models/GLM-5-W8A8/
 
 ```
   
 ++For cross-machine deployment, start xllm service with:++  
   
-```
+```bash
 ENABLE_DECODE_RESPONSE_TO_SERVICE=true ../xllm-service/build/xllm_service/xllm_master_serving --etcd_addr="11.87.191.82:3389" --http_server_port 38888 --rpc_server_port 38889 --tokenizer_path=/export/home/models/GLM-5-W8A8/
 
 ```
   
 - ++Start Prefill instances++  
   
-```
+```bash
   BATCH_SIZE=256
   # Maximum inference batch size
   XLLM_PATH="./myxllm/xllm/build/xllm/core/server/xllm"
@@ -874,7 +876,7 @@ ENABLE_DECODE_RESPONSE_TO_SERVICE=true ../xllm-service/build/xllm_service/xllm_m
   
 - Start Decode instances  
   
-```
+```bash
 BATCH_SIZE=256
 # Maximum inference batch size
 XLLM_PATH="./myxllm/xllm/build/xllm/core/server/xllm"
@@ -933,7 +935,7 @@ Notes:
 - PD separation requires reading ==/etc/hccn.conf==; ensure the host file is mounted into the container.  
   
 - ==etcd_addr== must match the ==etcd_addr== used by ==xllm_service==.  
-- The test command is similar to the one above. For ==curl http://localhost:{PORT}/v1/chat/completions ...==, use the xLLM service ==http_server_port== as ==PORT==.  
+- The test command is similar to the one above. For `curl http://localhost:{PORT}/v1/chat/completions ...`, use the xLLM service ==http_server_port== as ==PORT==.  
   
 - When deploying multiple P or Q instances across machines (for example, two P instances), add ==--rank_tablefile== to enable communication.  
   
